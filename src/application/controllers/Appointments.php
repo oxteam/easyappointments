@@ -607,10 +607,6 @@ class Appointments extends CI_Controller {
             $unavailable_dates = [];
 
             $provider_list = ($provider_id === ANY_PROVIDER) ? $this->_search_providers_by_service($service_id) : [$provider_id] ;
-            if (count($provider_list) === 0)
-            {
-                throw new Exception("No provider associated to the service");
-            }
 
             $this->load->model('providers_model');
 
@@ -647,8 +643,9 @@ class Appointments extends CI_Controller {
                     {
                         $available_hours = $this->_get_multiple_attendants_hours($current_date->format('Y-m-d'), $service,
                             $curr_provider);
+                        if (! empty($available_hours)) break;
                     }
-                    if (! empty($available_hours)) break;
+                    
                 }
 
                 // No availability amongst all the provider
