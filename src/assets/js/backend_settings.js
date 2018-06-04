@@ -97,12 +97,8 @@ window.BackendSettings = window.BackendSettings || {};
             $('#user-notifications').removeClass('active');
         }
 
-        if($('#current-user').hasClass('active')){
-            settings = new UserSettings();
-        }else{
-            // Set default settings helper.
-            settings = new SystemSettings();
-        }
+        // Set default settings helper.
+        settings = new SystemSettings();
 
         if (bindEventHandlers) {
             _bindEventHandlers();
