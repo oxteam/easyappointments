@@ -106,8 +106,8 @@ window.BackendSettings = window.BackendSettings || {};
 
         if (bindEventHandlers) {
             _bindEventHandlers();
-            $('#settings-page .nav li').first().addClass('active');
-            $('#settings-page .nav li').first().find('a').trigger('click');
+            var $link = $('#settings-page .nav li').not('.hidden').first().find('a');
+            $link.tab('show');
         }
 
         // Apply Privileges
