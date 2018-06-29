@@ -773,8 +773,8 @@ window.BackendCalendarDefaultView = window.BackendCalendarDefaultView || {};
                     title: appointment.service.name + ' - '
                     + appointment.customer.first_name + ' '
                     + appointment.customer.last_name,
-                    start: appointment.start_datetime,
-                    end: appointment.end_datetime,
+                    start: moment(appointment.start_datetime),
+                    end: moment(appointment.end_datetime),
                     allDay: false,
                     data: appointment // Store appointment data for later use.
                 };
@@ -785,28 +785,23 @@ window.BackendCalendarDefaultView = window.BackendCalendarDefaultView || {};
             $calendar.fullCalendar('removeEvents');
             $calendar.fullCalendar('addEventSource', calendarEvents);
 
-            var weekDays = [
-                'sunday', 
-                'monday', 
-                'tuesday', 
-                'wednesday', 
-                'thursday', 
-                'friday', 
-                'saturday' 
-            ];
-
             // :: ADD PROVIDER'S UNAVAILABLE TIME PERIODS
             var calendarView = $calendar.fullCalendar('getView').name;
 
             if (filterType === FILTER_TYPE_PROVIDER && calendarView !== 'month') {
                 $.each(GlobalVariables.availableProviders, function (index, provider) {
                     if (provider.id == recordId) {
-                        var workingPlan = jQuery.parseJSON(provider.settings.working_plan);
+                        var workingPlan={};
+                        var workingPlanBulk = jQuery.parseJSON(provider.settings.working_plan);
                         var unavailablePeriod;
+
+                        // Sort the working plan starting with the first day as set in General settings to correctly align breaks in the calendar display
+                        var fDaynum = GeneralFunctions.getWeekDayId(GlobalVariables.firstWeekday);
+                        workingPlan = GeneralFunctions.sortWeekDict(workingPlanBulk,fDaynum);
 
                         switch (calendarView) {
                             case 'agendaDay':
-                                var selectedDayName = weekDays[$calendar.fullCalendar('getView').start.format('d')];
+                                var selectedDayName = GeneralFunctions.getWeekDayName(parseInt($calendar.fullCalendar('getView').start.format('d')));
 
                                 // Add custom unavailable periods.
                                 $.each(response.unavailables, function (index, unavailable) {
@@ -1087,12 +1082,15 @@ window.BackendCalendarDefaultView = window.BackendCalendarDefaultView || {};
 
         var defaultView = window.innerWidth < 468 ? 'agendaDay' : 'agendaWeek';
 
+        var fDay = GlobalVariables.firstWeekday;
+        var fDaynum = GeneralFunctions.getWeekDayId(fDay);
+
         // Initialize page calendar
         $('#calendar').fullCalendar({
             defaultView: defaultView,
             height: _getCalendarHeight(),
             editable: true,
-            firstDay: 0,
+            firstDay: fDaynum,
             snapDuration: '00:30:00',
             timeFormat: timeFormat,
             slotLabelFormat: slotTimeFormat,
